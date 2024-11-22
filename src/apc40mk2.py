@@ -70,12 +70,11 @@ class LEDController:
         
         return closest_index
 
-    def set_clip_launch_led(self, channel, row, column, color):
+    def set_clip_launch_led(self, row, column, color, led_type):
         """
         Set the color of a clip launch button.
 
         Args:
-            channel (int): RGB Type (0-15).
             row (int): The row index of the clip launch button (1-5).
             column (int): The column index of the clip launch button (1-8).
             color (str|int): The color name, hex code, or index (0-127).
@@ -83,6 +82,23 @@ class LEDController:
                   yellow, green, cyan, blue, purple, magenta, pink.
                 - Hex codes: Any valid hexadecimal color code (e.g., "#FF0000").
                 - Index: Integer values between 0-127.
+            led_type (int): LED Type (0-15).
+                - 0: Primary Color
+                - 1: Secondary Color (Oneshot 1/24)
+                - 2: Secondary Color (Oneshot 1/16)
+                - 3: Secondary Color (Oneshot 1/8)
+                - 4: Secondary Color (Oneshot 1/4)
+                - 5: Secondary Color (Oneshot 1/2)
+                - 6: Secondary Color (Pulsing 1/24)
+                - 7: Secondary Color (Pulsing 1/16)
+                - 8: Secondary Color (Pulsing 1/8)
+                - 9: Secondary Color (Pulsing 1/4)
+                - 10: Secondary Color (Pulsing 1/2)
+                - 11: Secondary Color (Blinking 1/24)
+                - 12: Secondary Color (Blinking 1/16)
+                - 13: Secondary Color (Blinking 1/8)
+                - 14: Secondary Color (Blinking 1/4)
+                - 15: Secondary Color (Blinking 1/2)
 
         Returns:
             None
@@ -90,8 +106,8 @@ class LEDController:
         Raises:
             ValueError: If the channel, row, column, or color values are out of their valid ranges.
         """
-        if channel not in range(16):
-            raise ValueError(f"Invalid channel: {channel}. Must be 0-15.")
+        if led_type not in range(16):
+            raise ValueError(f"Invalid channel: {led_type}. Must be 0-15.")
         if row not in range(1, 6):
             raise ValueError(f"Invalid row: {row}. Must be 1-5.")
         if column not in range(1, 9):
@@ -111,7 +127,7 @@ class LEDController:
                 f"Invalid color: {color}. Must be an index (0-127), a hex code, or a valid color name."
             )
 
-        self.midiout.sendNoteOn(channel + 1, (5 - row) * 8 + column, color / 127)
+        self.midiout.sendNoteOn(led_type + 1, (5 - row) * 8 + column, color / 127)
     
     def set_record_arm_led(self, track, state):
         """
@@ -197,13 +213,39 @@ class LEDController:
         
         self.midiout.sendNoteOn(track, 0x33 + 1, 1 if state else 0)
     
-    def set_track_stop_led(self, track, state):
+    def set_clip_stop_led(self, track, state):
         """
         Set the state of the track stop LED.
 
         Args:
             track (int): The track index (1-8).
-            state (bool): The state of the track stop LED.
+            state (int): The state of the track stop LED.
+                - 0: Off
+                - 1: On
+                - 2: Blink (sync to tempo at 1/8 rate)
+
+        Returns:
+            None
+
+        Raises:
+            ValueError: If the track index is not in the range 1-8.
+            ValueError: If the state is not in the range 0-2.
+        """
+        if track not in range(1, 9):
+            raise ValueError(f"Invalid track: {track}. Must be 1-8.")
+        
+        if state not in range(3):
+            raise ValueError(f"Invalid state: {state}. Must be 0-2.")
+
+        self.midiout.sendNoteOn(track, 0x34 + 1, state / 127)
+    
+    def set_device_ctrl_button_led(self, index, state):
+        """
+        Set the state of the device control button LED.
+
+        Args:
+            index (int): The index of the device control button (1-8).
+            state (bool): The state of the device control button LED.
                 - True: On
                 - False: Off
 
@@ -211,13 +253,220 @@ class LEDController:
             None
 
         Raises:
+            ValueError: If the index is not in the range 1-8.
+        """
+        if index not in range(1, 9):
+            raise ValueError(f"Invalid index: {index}. Must be 1-8.")
+        
+        self.midiout.sendNoteOn(1, 0x3A + index, 1 if state else 0)
+        
+    def set_crossfader_assign_led(self, track, state):
+        """
+        Set the state of the crossfader assign LED.
+        
+        Args:
+            track (int): The track index (1-8).
+            state (int): The state of the crossfader assign LED (0-2).
+                - 0: Off
+                - 1: A
+                - 2: B
+        
+        Returns:
+            None
+        
+        Raises:
             ValueError: If the track index is not in the range 1-8.
+            ValueError: If the state is not in the range 0-2.
         """
         if track not in range(1, 9):
             raise ValueError(f"Invalid track: {track}. Must be 1-8.")
-        
-        self.midiout.sendNoteOn(track, 0x34 + 1, 1 if state else 0)
+        if state not in range(3):
+            raise ValueError(f"Invalid state: {state}. Must be 0-2.")
+
+        self.midiout.sendNoteOn(track, 0x42 + 1, state / 127)
     
+    def set_master_track_led(self, state):
+        """
+        Set the state of the master track LED.
+
+        Args:
+            state (bool): The state of the master track LED.
+                - True: On
+                - False: Off
+
+        Returns:
+            None
+        """
+        self.midiout.sendNoteOn(1, 0x50 + 1, 1 if state else 0)
+    
+    def set_scene_launch_led(self, scene, color, led_type):
+        """
+        Set the LED of a track scene launch button.
+        
+        Args:
+            scene (int): Scene index (1-5).
+            color (str|int): The color name, hex code, or index (0-127).
+                - Color names available: black, dark gray, gray, white, red, orange,
+                  yellow, green, cyan, blue, purple, magenta, pink.
+                - Hex codes: Any valid hexadecimal color code (e.g., "#FF0000").
+                - Index: Integer values between 0-127.
+            led_type (int): LED Type (0-15).
+                - 0: Primary Color
+                - 1: Secondary Color (Oneshot 1/24)
+                - 2: Secondary Color (Oneshot 1/16)
+                - 3: Secondary Color (Oneshot 1/8)
+                - 4: Secondary Color (Oneshot 1/4)
+                - 5: Secondary Color (Oneshot 1/2)
+                - 6: Secondary Color (Pulsing 1/24)
+                - 7: Secondary Color (Pulsing 1/16)
+                - 8: Secondary Color (Pulsing 1/8)
+                - 9: Secondary Color (Pulsing 1/4)
+                - 10: Secondary Color (Pulsing 1/2)
+                - 11: Secondary Color (Blinking 1/24)
+                - 12: Secondary Color (Blinking 1/16)
+                - 13: Secondary Color (Blinking 1/8)
+                - 14: Secondary Color (Blinking 1/4)
+                - 15: Secondary Color (Blinking 1/2)
+                
+        Returns:
+            None
+        
+        Raises:
+            ValueError: If the scene or color values are out of their valid ranges.
+        """
+        if led_type not in range(16):
+            raise ValueError(f"Invalid channel: {led_type}. Must be 0-15.")
+        if scene not in range(1, 6):
+            raise ValueError(f"Invalid scene: {scene}. Must be 1-5.")
+        
+        if isinstance(color, str):
+            if color.startswith("#"):
+                color = self._find_closest_color(color)
+            else:
+                color = self.color_map.get(color.lower())
+                if color is None:
+                    raise ValueError(
+                        f"Unknown color name: {color}. Use a valid name like 'red' or a hex code like '#FF0000'."
+                    )
+        if not isinstance(color, int) or color not in range(128):
+            raise ValueError(
+                f"Invalid color: {color}. Must be an index (0-127), a hex code, or a valid color name."
+            )
+
+        self.midiout.sendNoteOn(led_type + 1, 0x52 + scene, color / 127)
+
+    def set_pan_button_led(self, state):
+        """
+        Set the state of the pan button LED.
+
+        Args:
+            state (bool): The state of the pan button LED.
+                - True: On
+                - False: Off
+
+        Returns:
+            None
+        """
+        self.midiout.sendNoteOn(1, 0x57 + 1, 1 if state else 0)
+
+    def set_sends_button_led(self, state):
+        """
+        Set the state of the sends button LED.
+
+        Args:
+            state (bool): The state of the sends button LED.
+                - True: On
+                - False: Off
+
+        Returns:
+            None
+        """
+        self.midiout.sendNoteOn(1, 0x58 + 1, 1 if state else 0)
+    
+    def set_user_button_led(self, state):
+        """
+        Set the state of the user button LED.
+
+        Args:
+            state (bool): The state of the user button LED.
+                - True: On
+                - False: Off
+
+        Returns:
+            None
+        """
+        self.midiout.sendNoteOn(1, 0x59 + 1, 1 if state else 0)
+    
+    def set_metronome_button_led(self, state):
+        """
+        Set the state of the metronome button LED.
+
+        Args:
+            state (bool): The state of the metronome button LED.
+                - True: On
+                - False: Off
+
+        Returns:
+            None
+        """
+        self.midiout.sendNoteOn(1, 0x5A + 1, 1 if state else 0)
+    
+    def set_play_button_led(self, state):
+        """
+        Set the state of the play button LED.
+
+        Args:
+            state (bool): The state of the play button LED.
+                - True: On
+                - False: Off
+
+        Returns:
+            None
+        """
+        self.midiout.sendNoteOn(1, 0x5B + 1, 1 if state else 0)
+    
+    def set_record_button_led(self, state):
+        """
+        Set the state of the record button LED.
+
+        Args:
+            state (bool): The state of the record button LED.
+                - True: On
+                - False: Off
+
+        Returns:
+            None
+        """
+        self.midiout.sendNoteOn(1, 0x5D + 1, 1 if state else 0)
+    
+    def set_session_button_led(self, state):
+        """
+        Set the state of the session button LED.
+        
+        Args:
+            state (bool): The state of the session button LED.
+                - True: On
+                - False: Off
+
+        Returns:
+            None
+        """
+        self.midiout.sendNoteOn(1, 0x66 + 1, 1 if state else 0)
+        
+    def set_bank_button_led(self, state):
+        """
+        Set the state of the bank button LED.
+        
+        Args:
+            state (bool): The state of the bank button LED.
+                - True: On
+                - False: Off
+
+        Returns:
+            None
+        """
+        self.midiout.sendNoteOn(1, 0x67 + 1, 1 if state else 0)
+        
 class KnobController:
     """Class to manage all knob functionalities of APC40MK2."""
     
@@ -274,7 +523,7 @@ class KnobController:
         
         self.midiout.send(0xB0, 0x30 + index - 1, value)
 
-    def set_device_knob_type(self, channel, index, knob_type):
+    def set_device_ctrl_knob_type(self, channel, index, knob_type):
         """
         Configure the LED ring type for a device knob.
 
@@ -289,7 +538,6 @@ class KnobController:
                 - 1: Single
                 - 2: Volume Style
                 - 3: Pan Style
-                - 4-127: Custom values (treated as Single)
 
         Returns:
             None
@@ -303,12 +551,12 @@ class KnobController:
         if index not in range(1, 9):
             raise ValueError(f"Invalid index: {index}. The index must be in the range 1-8.")
         
-        if knob_type not in range(128):
-            raise ValueError(f"Invalid knob_type: {knob_type}. The knob_type must be in the range 0-127.")
+        if knob_type not in range(4):
+            raise ValueError(f"Invalid knob_type: {knob_type}. The knob_type must be in the range 0-3.")
         
         self.midiout.send(0xB0 + channel - 1, 0x18 + index - 1, knob_type)
     
-    def set_device_knob_value(self, channel, index, value):
+    def set_device_ctrl_knob_value(self, channel, index, value):
         """
         Set the value of a device knob.
 
@@ -364,10 +612,6 @@ class DeviceModeController:
         
         self.midiout.sendExclusive(0x47, 0x7F, 0x29, 0x60, 0x00, 0x04, 0x40 + mode, 0x01, 0x00, 0x00)
 
-    
-    
-
-
 class APC40MK2:
     """Main class to manage all functionalities of APC40MK2."""
 
@@ -376,3 +620,4 @@ class APC40MK2:
         self.led = LEDController(midiout)
         self.knob = KnobController(midiout)
         self.mode = DeviceModeController(midiout)
+    
