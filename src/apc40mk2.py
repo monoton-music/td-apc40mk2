@@ -70,7 +70,7 @@ class LEDController:
         
         return closest_index
 
-    def set_clip_launch_led(self, row, column, color, led_type):
+    def set_clip_launch(self, row, column, color, led_type):
         """
         Set the color of a clip launch button.
 
@@ -129,7 +129,7 @@ class LEDController:
 
         self.midiout.sendNoteOn(led_type + 1, (5 - row) * 8 + column, color / 127)
     
-    def set_record_arm_led(self, track, state):
+    def set_track_record(self, track, state):
         """
         Set the state of the record arm LED.
 
@@ -150,7 +150,7 @@ class LEDController:
         
         self.midiout.sendNoteOn(track, 0x30 + 1, 1 if state else 0)
 
-    def set_solo_led(self, track, state):
+    def set_track_solo(self, track, state):
         """
         Set the state of the solo LED.
 
@@ -171,7 +171,7 @@ class LEDController:
         
         self.midiout.sendNoteOn(track, 0x31 + 1, 1 if state else 0)
     
-    def set_activator_led(self, track, state):
+    def set_track_number(self, track, state):
         """
         Set the state of the activator LED.
 
@@ -192,7 +192,7 @@ class LEDController:
         
         self.midiout.sendNoteOn(track, 0x32 + 1, 1 if state else 0)
     
-    def set_track_select_led(self, track, state):
+    def set_track_select(self, track, state):
         """
         Set the state of the track select LED.
 
@@ -213,7 +213,7 @@ class LEDController:
         
         self.midiout.sendNoteOn(track, 0x33 + 1, 1 if state else 0)
     
-    def set_clip_stop_led(self, track, state):
+    def set_track_clip_stop(self, track, state):
         """
         Set the state of the track stop LED.
 
@@ -239,7 +239,7 @@ class LEDController:
 
         self.midiout.sendNoteOn(track, 0x34 + 1, state / 127)
     
-    def set_device_ctrl_button_led(self, index, state):
+    def set_device_ctrl_button(self, index, state):
         """
         Set the state of the device control button LED.
 
@@ -260,7 +260,7 @@ class LEDController:
         
         self.midiout.sendNoteOn(1, 0x3A + index, 1 if state else 0)
         
-    def set_crossfader_assign_led(self, track, state):
+    def set_track_ab_assign(self, track, state):
         """
         Set the state of the crossfader assign LED.
         
@@ -285,7 +285,7 @@ class LEDController:
 
         self.midiout.sendNoteOn(track, 0x42 + 1, state / 127)
     
-    def set_master_track_led(self, state):
+    def set_master_track(self, state):
         """
         Set the state of the master track LED.
 
@@ -299,7 +299,7 @@ class LEDController:
         """
         self.midiout.sendNoteOn(1, 0x50 + 1, 1 if state else 0)
     
-    def set_scene_launch_led(self, scene, color, led_type):
+    def set_scene_launch(self, scene, color, led_type):
         """
         Set the LED of a track scene launch button.
         
@@ -355,7 +355,7 @@ class LEDController:
 
         self.midiout.sendNoteOn(led_type + 1, 0x52 + scene, color / 127)
 
-    def set_pan_button_led(self, state):
+    def set_pan(self, state):
         """
         Set the state of the pan button LED.
 
@@ -369,7 +369,7 @@ class LEDController:
         """
         self.midiout.sendNoteOn(1, 0x57 + 1, 1 if state else 0)
 
-    def set_sends_button_led(self, state):
+    def set_sends(self, state):
         """
         Set the state of the sends button LED.
 
@@ -383,7 +383,7 @@ class LEDController:
         """
         self.midiout.sendNoteOn(1, 0x58 + 1, 1 if state else 0)
     
-    def set_user_button_led(self, state):
+    def set_user(self, state):
         """
         Set the state of the user button LED.
 
@@ -397,7 +397,7 @@ class LEDController:
         """
         self.midiout.sendNoteOn(1, 0x59 + 1, 1 if state else 0)
     
-    def set_metronome_button_led(self, state):
+    def set_metronome(self, state):
         """
         Set the state of the metronome button LED.
 
@@ -411,7 +411,7 @@ class LEDController:
         """
         self.midiout.sendNoteOn(1, 0x5A + 1, 1 if state else 0)
     
-    def set_play_button_led(self, state):
+    def set_play(self, state):
         """
         Set the state of the play button LED.
 
@@ -425,7 +425,7 @@ class LEDController:
         """
         self.midiout.sendNoteOn(1, 0x5B + 1, 1 if state else 0)
     
-    def set_record_button_led(self, state):
+    def set_record(self, state):
         """
         Set the state of the record button LED.
 
@@ -439,7 +439,7 @@ class LEDController:
         """
         self.midiout.sendNoteOn(1, 0x5D + 1, 1 if state else 0)
     
-    def set_session_button_led(self, state):
+    def set_session(self, state):
         """
         Set the state of the session button LED.
         
@@ -453,7 +453,7 @@ class LEDController:
         """
         self.midiout.sendNoteOn(1, 0x66 + 1, 1 if state else 0)
         
-    def set_bank_button_led(self, state):
+    def set_bank(self, state):
         """
         Set the state of the bank button LED.
         
@@ -613,7 +613,7 @@ class DeviceModeController:
         self.midiout.sendExclusive(0x47, 0x7F, 0x29, 0x60, 0x00, 0x04, 0x40 + mode, 0x01, 0x00, 0x00)
 
 class APC40MK2:
-    """Main class to manage all functionalities of APC40MK2."""
+    """Main class to manage functionalities of APC40MK2."""
 
     def __init__(self, midiout):
         self.midiout = midiout
