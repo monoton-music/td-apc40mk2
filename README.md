@@ -55,7 +55,7 @@ For a full list of functions and their parameters, refer to the DocStrings in th
 Example:
 
 ```python
-# Set the device to Ableton Live Mode
+# Set the device to Alternate Ableton Live Mode
 apc.mode.set_device_mode(mode=2)
 ```
 
