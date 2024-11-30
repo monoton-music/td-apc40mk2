@@ -8,7 +8,7 @@ A Python module for integrating the **Akai APC40 MK2** MIDI controller with **To
 
 This module was developed and tested using
 
-- TouchDesigner 2021.11600 Commercial
+- TouchDesigner 2023.11600 Commercial
 - Akai APC40 MK2
 - MacBook Pro (M2 Pro, macOS Ventura 13.6.3)
 
